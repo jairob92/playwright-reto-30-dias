@@ -1,21 +1,18 @@
 import { expect, test } from '@playwright/test';
+import { LoginPage } from '../pageobjects/LoginPage';
 
 test('Login to HRM', async ({ page }) => {
-	
-    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login')
-    await page.getByRole('textbox',{name:'Username'}).fill('Admin')
-    await page.getByRole('textbox',{name:'Password'}).fill('admin123')
-    await page.getByRole('button',{name:'login'}).click()
+
+    const loginPage = new LoginPage(page)
+    await loginPage.doLogin('Admin','admin123')
 
     await expect(page.getByRole('link',{name:'Admin'})).toBeVisible()
 });
 
 test('Login to HRM with wrong Credentials',async({page})=>{
 
-    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login')
-    await page.getByRole('textbox',{name:'Username'}).fill('Admin')
-    await page.getByRole('textbox',{name:'Password'}).fill('123456')
-    await page.getByRole('button',{name:'Login'}).click()
+    const loginPage = new LoginPage(page)
+    await loginPage.doLogin('Admin','123456')
 
     await expect(page.getByText('Invalid credentials')).toBeVisible()
 })
