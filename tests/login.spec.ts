@@ -1,12 +1,17 @@
 import { expect, test } from '@playwright/test';
 import { LoginPage } from '../pageobjects/LoginPage';
+import { sideMenuOption, SidePanel } from '../components/sidePanel';
 
 test('Login to HRM', async ({ page }) => {
 
     const loginPage = new LoginPage(page)
     await loginPage.doLogin('Admin','admin123')
 
-    await expect(page.getByRole('link',{name:'Admin'})).toBeVisible()
+    const sidePanel = new SidePanel(page)
+
+    await sidePanel.clickOnOption(sideMenuOption.ADMIN)
+    await sidePanel.clickOnOption(sideMenuOption.BUZZ)
+    await sidePanel.clickOnOption(sideMenuOption.DASHBOARD)
 });
 
 test('Login to HRM with wrong Credentials',async({page})=>{

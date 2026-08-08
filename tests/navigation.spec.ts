@@ -1,5 +1,7 @@
 import{expect, test} from '@playwright/test'
 import { LoginPage } from '../pageobjects/LoginPage'
+import { sideMenuOption, SidePanel } from '../components/sidePanel';
+
 
 test('check left menu options',async({page})=>{
 
@@ -129,4 +131,12 @@ test('check all the Organization links',async({page})=>{
 
         await page.getByRole('navigation',{name:'Topbar menu'}).getByText('Organization').click()
     }
+})
+
+test('Search option in sidePanel',async({page})=>{
+    const loginPage = new LoginPage(page)
+    await loginPage.doLogin('Admin','admin123')
+
+    const sidePanel = new SidePanel(page)
+    await sidePanel.searchMenuOption(sideMenuOption.DIRECTORY)
 })
