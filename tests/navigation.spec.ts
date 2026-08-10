@@ -1,6 +1,9 @@
 import{expect, test} from '@playwright/test'
 import { LoginPage } from '../pageobjects/LoginPage'
 import { sideMenuOption, SidePanel } from '../components/sidePanel';
+import { TopBarMenu } from '../components/top-bar-menu/TopBarMenu';
+import { OrganizationOption } from '../components/top-bar-menu/OrganizationsMenu';
+import { QualificationsOption } from '../components/top-bar-menu/Qualifications';
 
 
 test('check left menu options',async({page})=>{
@@ -139,4 +142,28 @@ test('Search option in sidePanel',async({page})=>{
 
     const sidePanel = new SidePanel(page)
     await sidePanel.searchMenuOption(sideMenuOption.DIRECTORY)
+})
+
+test('checking topbar menu',async({page})=>{
+
+    const loginPage = new LoginPage(page)
+    await loginPage.loginAsAdmin()
+
+    const sidePanel = new SidePanel(page)
+    sidePanel.clickOnOption(sideMenuOption.ADMIN)
+
+    const topBarMenu= new TopBarMenu(page)
+    await topBarMenu.job.clickOnJobTitles()
+    await topBarMenu.job.clickOnPayGrades()
+    await topBarMenu.userManagement.clickOnUsers()
+    await topBarMenu.organization.clickOnOrganizationOption(OrganizationOption.GENERAL_INFORMATION)
+    await topBarMenu.organization.clickOnOrganizationOption(OrganizationOption.LOCATIONS)
+    await topBarMenu.organization.clickOnOrganizationOption(OrganizationOption.STRUCTURE)
+    await topBarMenu.qualifications.clickOnQualificationOption(QualificationsOption.SKILLS)
+    await topBarMenu.qualifications.clickOnQualificationOption(QualificationsOption.EDUCATION)
+    await topBarMenu.qualifications.clickOnQualificationOption(QualificationsOption.LANGUAGES)
+    await topBarMenu.qualifications.clickOnQualificationOption(QualificationsOption.LICENSES)
+    await topBarMenu.qualifications.clickOnQualificationOption(QualificationsOption.MEMBERSHIP)
+
+
 })
