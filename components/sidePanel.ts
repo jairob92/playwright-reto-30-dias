@@ -33,6 +33,10 @@ export class SidePanel{
         await expect(this.menuOption(option)).toBeVisible()
         expect(await this.menuOptionli.count()).toEqual(1)
     }
+
+    async menuOptionNotVisible(option:sideMenuOption){
+        await this.menuOption(option).isHidden()
+    }
     
 }
 

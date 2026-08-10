@@ -5,7 +5,7 @@ import { sideMenuOption, SidePanel } from '../components/sidePanel';
 test('Login to HRM', async ({ page }) => {
 
     const loginPage = new LoginPage(page)
-    await loginPage.doLogin('Admin','admin123')
+    await loginPage.loginAsAdmin()
 
     const sidePanel = new SidePanel(page)
 
@@ -20,4 +20,11 @@ test('Login to HRM with wrong Credentials',async({page})=>{
     await loginPage.doLogin('Admin','123456')
 
     await expect(page.getByText('Invalid credentials')).toBeVisible()
+})
+
+test('Login to HRM as employee',async({page})=>{
+    const loginPage = new LoginPage(page)
+    await loginPage.loginAsEmployee()
+    const sidePanel = new SidePanel(page)
+    await sidePanel.menuOptionNotVisible(sideMenuOption.ADMIN)
 })
