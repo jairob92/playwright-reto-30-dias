@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import { LoginPage } from '../pageobjects/LoginPage';
+import { sideMenuOption, SidePanel } from '../components/sidePanel';
 
 test('Get all usernames registered',async({page})=>{
 
@@ -115,4 +116,22 @@ test('Select random user for edition',async({page})=>{
     expect(currentUsername).toEqual(username)
     expect(page.locator("//label[contains(., 'Username')]/parent::div/following-sibling::div/input"))
         .toHaveValue(currentUsername)
+})
+
+test('Check User role options',async({page})=>{
+
+    const expectedRoleOptions=[ '-- Select --', 'Admin', 'ESS','EMPLOYE' ]
+
+    const loginPage = new LoginPage(page)
+    await loginPage.loginAsAdmin()
+
+    const sidePanel = new SidePanel(page)
+    await sidePanel.clickOnOption(sideMenuOption.ADMIN)
+
+    await page.locator("//label[contains(.,'User Role')]//parent::div/following-sibling::div").click()
+    const currentUserRoleOptions = await page.getByRole('listbox').getByRole('option').allInnerTexts()
+    expect(currentUserRoleOptions).toEqual(expectedRoleOptions)
+
+    
+
 })
