@@ -120,7 +120,7 @@ test('Select random user for edition',async({page})=>{
 
 test('Check User role options',async({page})=>{
 
-    const expectedRoleOptions=[ '-- Select --', 'Admin', 'ESS','EMPLOYE' ]
+    const expectedRoleOptions=[ '-- Select --', 'Admin', 'ESS']
 
     const loginPage = new LoginPage(page)
     await loginPage.loginAsAdmin()
@@ -132,6 +132,22 @@ test('Check User role options',async({page})=>{
     const currentUserRoleOptions = await page.getByRole('listbox').getByRole('option').allInnerTexts()
     expect(currentUserRoleOptions).toEqual(expectedRoleOptions)
 
-    
+})
+
+
+test('Check status role options',async({page})=>{
+
+    const expectedStatusOptions=[ '-- Select --', 'Enabled', 'Disabled' ]
+
+    const loginPage = new LoginPage(page)
+    await loginPage.loginAsAdmin()
+
+    const sidePanel = new SidePanel(page)
+    await sidePanel.clickOnOption(sideMenuOption.ADMIN)
+
+    await page.locator("//label[contains(.,'Status')]//parent::div/following-sibling::div").click()
+    const currentStatusOptions = await page.getByRole('listbox').getByRole('option').allInnerTexts()
+    console.log(currentStatusOptions)
+    expect(currentStatusOptions).toEqual(expectedStatusOptions)
 
 })
