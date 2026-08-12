@@ -28,7 +28,6 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('')`. */
      baseURL: 'https://opensource-demo.orangehrmlive.com',
 
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
 
@@ -39,6 +38,29 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+
+    {
+      name: 'setup',
+      testMatch: /.*\.setup\.ts/,
+    },
+
+    {
+      name: 'admin',
+      dependencies: ['setup'],
+      use: { 
+        ...devices['Desktop Chrome'],
+        storageState:'.auth/admin.json'
+       }
+    },
+        {
+      name: 'employee',
+      dependencies: ['setup'],
+      use: { 
+        ...devices['Desktop Chrome'],
+        storageState:'.auth/employee.json'
+       }
+    },
+
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
