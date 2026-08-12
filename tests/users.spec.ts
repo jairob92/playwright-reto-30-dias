@@ -182,3 +182,36 @@ test('Filter by user admin',async({page})=>{
         await expect(allbodyRows.nth(i).getByRole('cell').nth(2)).toContainText('Admin')
     }
 })
+
+test('capture all amounts',async({page})=>{
+
+    await page.goto('/web/index.php/claim/viewAssignClaim')
+    const allbodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+    const amounts:number[]=[]
+
+    const rowCount = await allbodyRows.count()
+    console.log('filtas totales',rowCount)
+
+    for(let i=0; i<rowCount; i++){
+        const amountCell = allbodyRows.nth(i).getByRole('cell').nth(7)
+        const amounText = await amountCell.textContent()
+        console.log('Monto total el texto',amounText)
+
+        if(amounText===null){
+            continue;
+        }
+        const convertedNumber= parseFloat(amounText?.replace(/,/g, '').trim())
+        amounts.push(convertedNumber)
+    }
+        console.log(amounts)
+
+        let total = 0;
+
+        for(let amount of amounts){
+            total+= amount
+        }
+        const promedio: number = amounts.length > 0 ? total / amounts.length:0
+        const valorMaximo = Math.max(...amounts)
+        console.log('promedio',promedio)
+        console.log('valor maximo',valorMaximo)
+})

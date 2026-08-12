@@ -17,7 +17,7 @@
 
  })
 
-setup('Authentication as employee',async({page})=>{
+/* setup('Authentication as employee',async({page})=>{
 
     console.log('Autenticacion iniciada usando el setup')
     //iniciar sesion
@@ -31,4 +31,4 @@ setup('Authentication as employee',async({page})=>{
 
     console.log('Autenticacion completada usando setup')
 
- })
+ })*/
