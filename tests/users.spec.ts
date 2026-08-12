@@ -151,3 +151,34 @@ test('Check status role options',async({page})=>{
     expect(currentStatusOptions).toEqual(expectedStatusOptions)
 
 })
+
+test('Filter by user admin',async({page})=>{
+
+    const loginPage = new LoginPage(page)
+    await loginPage.loginAsAdmin()
+
+    const sidePanel = new SidePanel(page)
+    await sidePanel.clickOnOption(sideMenuOption.ADMIN)
+
+    const allbodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+
+    const currentAdminRoles=allbodyRows.filter(
+        {has: page.getByRole('cell').nth(2).getByText('Admin')
+    })
+
+    const expectedAdminCount= await currentAdminRoles.count()
+
+    console.log('Admin users before filtering: ',expectedAdminCount)
+
+    //aplicar filtro
+    await page.locator("//label[contains(.,'User Role')]//parent::div/following-sibling::div").click()
+    await page.getByRole('listbox').getByRole('option',{name:'Admin'}).click()
+    await page.getByRole('button',{name:'Search'}).click()
+
+    //La tabla filtrada deberia tener exactamente la misma cantidad de encontramos
+    await expect(allbodyRows).toHaveCount(expectedAdminCount)
+
+    for(let i=0; i<expectedAdminCount; i++){
+        await expect(allbodyRows.nth(i).getByRole('cell').nth(2)).toContainText('Admin')
+    }
+})
