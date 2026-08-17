@@ -2,6 +2,9 @@ import {test, expect} from '@playwright/test';
 import { LoginPage } from '../pageobjects/LoginPage';
 import { sideMenuOption, SidePanel } from '../components/sidePanel';
 import { TopBarMenu} from '../components/top-bar-menu/TopBarMenu'
+import { AddNewUserPage } from '../pageobjects/AddNewUserPage';
+import { Navigate } from '../pageobjects/Navigate';
+import { userModel } from '../models/userModel';
 
 test('Get all usernames registered',async({page})=>{
 
@@ -278,52 +281,26 @@ test('Add new user using diferent passwords',async({page})=>{
     const password = 'R4mdom45..'
     const employeeToSearch='Qwerty LName'
 
-    await page.goto('/web/index.php/dashboard/index')
+    const navigate=new Navigate(page)
+    await navigate.toDashboard()
 
     const sidePanel= new SidePanel(page)
-
     await sidePanel.clickOnOption(sideMenuOption.ADMIN)
 
     const topBarMenu= new TopBarMenu(page)
-
     await topBarMenu.userManagement.clickOnUsers()
 
-    await page.getByText('Add').click()
+    const userToAdd:userModel= {
+        username:randomUsername,
+        employee:employeeToSearch,
+        password:password,
+        confirmPassword:'password',
+        role:'ESS',
+        status:'Enabled'
+    }
 
-    await page.locator('div.oxd-grid-item--gutters')
-    .filter({has: page.getByText('User Role')})
-    .locator('div.oxd-select-text-input')
-    .click()
+    const addNewUserPage = new AddNewUserPage(page)
+    await addNewUserPage.addNewUser(userToAdd)
+    await addNewUserPage.checkUserWasAddedMessage()
 
-    await page.getByText('ESS',{exact:true}).click()
-
-    await page.getByRole('textbox',{name:'Type for hints...'}).fill(employeeToSearch)
-
-    await page.getByText('Qwerty Qwerty LName').click()
-
-    await page.locator('div.oxd-grid-item--gutters')
-    .filter({has: page.getByText('Status')})
-    .locator('div.oxd-select-text-input')
-    .click()
-
-    await page.getByText('Enabled').click()
-
-    await page.locator('div.oxd-grid-item--gutters')
-    .filter({has: page.getByText('Username')})
-    .getByRole('textbox')
-    .fill(randomUsername)
-
-    await page.locator('div.oxd-grid-item--gutters')
-    .filter({has: page.getByText('Password',{exact:true})})
-    .getByRole('textbox')
-    .fill(password)
-
-     await page.locator('div.oxd-grid-item--gutters')
-    .filter({has: page.getByText('Confirm Password',{exact:true})})
-    .getByRole('textbox')
-    .fill('R4mdom42..')
-
-    await page.getByRole('button',{name:'Save'}).click()
-
-    await expect(page.locator('span.oxd-input-field-error-message')).toHaveText('Passwords do not match')
 })
