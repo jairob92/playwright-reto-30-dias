@@ -1,4 +1,4 @@
-export interface userModel {
+export interface UserModel {
     role:string,
     employee:string,
     status:string,

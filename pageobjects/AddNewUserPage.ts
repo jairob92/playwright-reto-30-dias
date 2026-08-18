@@ -1,5 +1,5 @@
 import { Locator, Page, expect } from "@playwright/test";
-import { userModel } from "../models/userModel";
+import { userModel } from "../models/UserModel";
 
 export class AddNewUserPage {
   private readonly page: Page;
@@ -47,12 +47,13 @@ export class AddNewUserPage {
 
   async selectUserRole(userRole: string) {
     await this.userRoleSelect.click();
-    await this.page.getByText(userRole, { exact: true }).click();
+    //await this.page.getByText(userRole, { exact: true }).click();
+    await this.page.getByRole('option',{name:userRole}).click()
   }
 
   async selectEmployeeName(employeeName: string) {
     await this.employeeNameSelect.fill(employeeName);
-    await this.page.getByText("Qwerty Qwerty LName").click();
+    await this.page.getByText(employeeName,{exact:true}).first().click();
   }
 
   async selectStatus(status: string) {
