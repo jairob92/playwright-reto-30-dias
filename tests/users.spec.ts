@@ -6,6 +6,8 @@ import { AddNewUserPage } from "../pageobjects/AddNewUserPage";
 import { Navigate } from "../pageobjects/Navigate";
 import { UserModel, userModel } from "../models/UserModel";
 import { UserFactory } from "../factory/UserFactory";
+import { UsersTable } from "../components/UserTable";
+import { ViewSystemUsers } from "../components/ViewSystemUsers";
 
 test("Get all usernames registered", async ({ page }) => {
   const loginPage = new LoginPage(page);
@@ -198,37 +200,23 @@ test("Filter by user admin", async ({ page }) => {
   const sidePanel = new SidePanel(page);
   await sidePanel.clickOnOption(sideMenuOption.ADMIN);
 
-  const allbodyRows = page
-    .getByRole("table")
-    .getByRole("rowgroup")
-    .nth(1)
-    .getByRole("row");
+  const viewSystemUsers= new ViewSystemUsers(page)
 
-  const currentAdminRoles = allbodyRows.filter({
-    has: page.getByRole("cell").nth(2).getByText("Admin"),
-  });
+  const usersTable = new UsersTable(page)
 
-  const expectedAdminCount = await currentAdminRoles.count();
+  const expectedAdminCount = await usersTable.getTotalAdminsRegistered();
 
   console.log("Admin users before filtering: ", expectedAdminCount);
 
-  //aplicar filtro
-  await page
-    .locator(
-      "//label[contains(.,'User Role')]//parent::div/following-sibling::div",
-    )
-    .click();
-  await page
-    .getByRole("listbox")
-    .getByRole("option", { name: "Admin" })
-    .click();
-  await page.getByRole("button", { name: "Search" }).click();
+  await viewSystemUsers.clickOnUserRoleSelect()
+  await viewSystemUsers.selectRole('Admin')
+  await viewSystemUsers.clickOnSearch()
 
   //La tabla filtrada deberia tener exactamente la misma cantidad de encontramos
-  await expect(allbodyRows).toHaveCount(expectedAdminCount);
+  await expect(usersTable.getAllbodyRows()).toHaveCount(expectedAdminCount);
 
   for (let i = 0; i < expectedAdminCount; i++) {
-    await expect(allbodyRows.nth(i).getByRole("cell").nth(2)).toContainText(
+    await expect(usersTable.getAllbodyRows().nth(i).getByRole("cell").nth(2)).toContainText(
       "Admin",
     );
   }
@@ -244,7 +232,7 @@ test("capture all amounts", async ({ page }) => {
   const amounts: number[] = [];
 
   const rowCount = await allbodyRows.count();
-  console.log("filtas totales", rowCount);
+  console.log("filas totales", rowCount);
 
   for (let i = 0; i < rowCount; i++) {
     const amountCell = allbodyRows.nth(i).getByRole("cell").nth(7);
@@ -270,70 +258,6 @@ test("capture all amounts", async ({ page }) => {
   console.log("valor maximo", valorMaximo);
 });
 
-test("Add new user", async ({ page }) => {
-  const randomUsername = "goku" + crypto.randomUUID();
-  const password = "R4mdom45..";
-  const employeeToSearch = "Qwerty LName";
-
-  await page.goto("/web/index.php/dashboard/index");
-
-  const sidePanel = new SidePanel(page);
-
-  await sidePanel.clickOnOption(sideMenuOption.ADMIN);
-
-  const topBarMenu = new TopBarMenu(page);
-
-  await topBarMenu.userManagement.clickOnUsers();
-
-  await page.getByText("Add").click();
-
-  await page
-    .locator("div.oxd-grid-item--gutters")
-    .filter({ has: page.getByText("User Role") })
-    .locator("div.oxd-select-text-input")
-    .click();
-
-  await page.getByText("ESS", { exact: true }).click();
-
-  await page
-    .getByRole("textbox", { name: "Type for hints..." })
-    .fill(employeeToSearch);
-
-  await page.getByText("Qwerty Qwerty LName").click();
-
-  await page
-    .locator("div.oxd-grid-item--gutters")
-    .filter({ has: page.getByText("Status") })
-    .locator("div.oxd-select-text-input")
-    .click();
-
-  await page.getByText("Enabled").click();
-
-  await page
-    .locator("div.oxd-grid-item--gutters")
-    .filter({ has: page.getByText("Username") })
-    .getByRole("textbox")
-    .fill(randomUsername);
-
-  await page
-    .locator("div.oxd-grid-item--gutters")
-    .filter({ has: page.getByText("Password", { exact: true }) })
-    .getByRole("textbox")
-    .fill(password);
-
-  await page
-    .locator("div.oxd-grid-item--gutters")
-    .filter({ has: page.getByText("Confirm Password", { exact: true }) })
-    .getByRole("textbox")
-    .fill(password);
-
-  await page.getByRole("button", { name: "Save" }).click();
-
-  await expect(page.locator("p.oxd-text--toast-message")).toHaveText(
-    "Successfully Saved",
-  );
-});
-
 test("Add new user using diferent passwords", async ({ page }) => {
   // const randomUsername = 'goku'+crypto.randomUUID()
   // const password = 'R4mdom45..'
@@ -347,6 +271,7 @@ test("Add new user using diferent passwords", async ({ page }) => {
 
   const topBarMenu = new TopBarMenu(page);
   await topBarMenu.userManagement.clickOnUsers();
+
 
   /*const userToAdd:UserModel= {
         username:randomUsername,
@@ -363,7 +288,7 @@ test("Add new user using diferent passwords", async ({ page }) => {
 
   const addNewUserPage = new AddNewUserPage(page);
   await addNewUserPage.addNewUser(adminUser);
-  await addNewUserPage.checkUserWasAddedMessage();
+  await addNewUserPage.checkUserWasntAddedMessage();
 });
 
 test("Add new user admin", async ({ page }) => {
@@ -376,94 +301,105 @@ test("Add new user admin", async ({ page }) => {
   const topBarMenu = new TopBarMenu(page);
   await topBarMenu.userManagement.clickOnUsers();
 
-  const allbodyRows = page
-    .getByRole("table")
-    .getByRole("rowgroup")
-    .nth(1)
-    .getByRole("row");
+  const usersTable = new UsersTable(page)
 
-  const currentAdminRoles = allbodyRows.filter({
-    has: page.getByRole("cell").nth(2).getByText("Admin"),
-  });
+  const addNewUserPage = new AddNewUserPage(page);
 
-  const firstAdminToSearch = currentAdminRoles.first();
-  await expect(
-    firstAdminToSearch,
-    "no admin users found in the table",
-  ).toHaveCount(1);
+  await usersTable.editFirstAdminOnTable()
 
-  const pencilToEditAdmin = firstAdminToSearch
-    .locator("button")
-    .filter({ has: page.locator("i.bi-pencil-fill") });
-
-  await pencilToEditAdmin.click();
-
-  const fullUserToSearch = await page
-    .getByRole("textbox", { name: "Type for hints..." })
-    .inputValue();
-
-  console.log(`User to search ${fullUserToSearch}`);
+  const fullUserToSearch= await addNewUserPage.getEmployeeName()
 
   const adminUser = UserFactory.createAdmin({
     employee: fullUserToSearch,
   });
 
   await page.goBack();
-
-  const addNewUserPage = new AddNewUserPage(page);
   await addNewUserPage.addNewUser(adminUser);
-  await expect(page.locator("p.oxd-text--toast-message")).toHaveText(
-    "Successfully Saved",
-  );
+  await addNewUserPage.checkUserWasAddedMessage();
 });
 
 test("Add new user employee", async ({ page }) => {
   const navigate = new Navigate(page);
-  await navigate.toDashboard();
+  await navigate.toUsers()
 
-  const sidePanel = new SidePanel(page);
-  await sidePanel.clickOnOption(sideMenuOption.ADMIN);
+  const addNewUserPage = new AddNewUserPage(page);
 
-  const topBarMenu = new TopBarMenu(page);
-  await topBarMenu.userManagement.clickOnUsers();
+  const usersTable = new UsersTable(page)
 
-  const allbodyRows = page
-    .getByRole("table")
-    .getByRole("rowgroup")
-    .nth(1)
-    .getByRole("row");
+  await usersTable.editFirstEmployeeOnTable()
 
-  const currentAdminRoles = allbodyRows.filter({
-    has: page.getByRole("cell").nth(2).getByText("ESS"),
-  });
+  const fullUserToSearch= await addNewUserPage.getEmployeeName()
 
-  const firstEmployeeToSearch = currentAdminRoles.first();
-  await expect(
-    firstEmployeeToSearch,
-    "no employee users found in the table",
-  ).toHaveCount(1);
-
-  const pencilToEditEmployee = firstEmployeeToSearch
-    .locator("button")
-    .filter({ has: page.locator("i.bi-pencil-fill") });
-
-  await pencilToEditEmployee.click();
-
-  const fullUserToSearch = await page
-    .getByRole("textbox", { name: "Type for hints..." })
-    .inputValue();
-
-  console.log(`User to search ${fullUserToSearch}`);
-
-  const adminUser = UserFactory.createEmployeeESS({
+  const employeeUser = UserFactory.createEmployeeESS({
     employee: fullUserToSearch,
   });
 
   await page.goBack();
+  await addNewUserPage.addNewUser(employeeUser);
+  await addNewUserPage.checkUserWasAddedMessage();
+
+});
+
+test('Delete user admin',async({page})=>{
+
+  //Arrange
+  const navigate = new Navigate(page);
+  await navigate.toUsers()
 
   const addNewUserPage = new AddNewUserPage(page);
+
+  const usersTable = new UsersTable(page)
+
+  await usersTable.editFirstEmployeeOnTable()
+
+  const fullUserToSearch= await addNewUserPage.getEmployeeName()
+
+  const adminUser = UserFactory.createAdmin({
+    employee: fullUserToSearch,
+  });
+
+  await page.goBack();
   await addNewUserPage.addNewUser(adminUser);
-  await expect(page.locator("p.oxd-text--toast-message")).toHaveText(
-    "Successfully Saved",
-  );
-});
+  await addNewUserPage.checkUserWasAddedMessage();
+
+  //Act
+  await usersTable.clickOnDeleteActionByUsername(adminUser.username)
+  await usersTable.acceptDeleteUser()
+  await usersTable.checkUserDeleted(adminUser.username)
+
+  //Assert
+  await addNewUserPage.checkUserWasDeletedMessage()
+
+})
+
+
+test('Cancel delete action on user admin',async({page})=>{
+
+  //Arrange
+  const navigate = new Navigate(page);
+  await navigate.toUsers()
+
+  const addNewUserPage = new AddNewUserPage(page);
+
+  const usersTable = new UsersTable(page)
+
+  await usersTable.editFirstEmployeeOnTable()
+
+  const fullUserToSearch= await addNewUserPage.getEmployeeName()
+
+  const adminUser = UserFactory.createAdmin({
+    employee: fullUserToSearch,
+  });
+
+  await page.goBack();
+  await addNewUserPage.addNewUser(adminUser);
+  await addNewUserPage.checkUserWasAddedMessage();
+
+  //Act
+  await usersTable.clickOnDeleteActionByUsername(adminUser.username)
+  await usersTable.cancelDeleteUser()
+  
+  //Assert
+ await usersTable.checkUserAvailable(adminUser.username)
+
+})

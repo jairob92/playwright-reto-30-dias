@@ -77,10 +77,21 @@ export class AddNewUserPage {
     await this.saveButton.click();
   }
 
-  async checkUserWasAddedMessage() {
+  async checkUserWasntAddedMessage() {
     await expect(
       this.page.locator("span.oxd-input-field-error-message"),
     ).toHaveText("Passwords do not match");
+  }
+
+  async checkUserWasAddedMessage() {
+  await expect(this.page.locator("p.oxd-text--toast-message")).toHaveText(
+    "Successfully Saved");
+  }
+
+  async checkUserWasDeletedMessage() {
+  await expect(this.page.locator("p.oxd-text--toast-message")).toHaveText(
+    "Successfully Deleted",{timeout:30_000},
+  );
   }
 
   async addNewUser(user:userModel){
@@ -92,5 +103,10 @@ export class AddNewUserPage {
     await this.enterPassword(user.password)
     await this.enterConfirmPassword(user.confirmPassword)
     await this.clickOnSave()
+  }
+  async getEmployeeName():Promise<string>{
+    await expect(this.page.getByRole("textbox", { name: "Type for hints..." })).toHaveValue(/\S/)
+    const fullUserToSearch = await this.page.getByRole("textbox", { name: "Type for hints..." }).inputValue();
+    return fullUserToSearch
   }
 }
